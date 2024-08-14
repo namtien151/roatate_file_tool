@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:stacked/stacked.dart';
 import 'package:roatate_file_tool/app/app.locator.dart';
@@ -11,13 +13,15 @@ class HomeViewModel extends BaseViewModel {
   double progressValue = 0.0;
   StartupViewModel() {
     // Initialize fileStatuses based on the number of selected files.
-    fileStatuses = List.generate(selectedFiles?.length ?? 0, (index) => FileStatus(id: index, status: FileStatusType.idle));
+    fileStatuses = List.generate(selectedFiles?.length ?? 0,
+        (index) => FileStatus(id: index, status: FileStatusType.idle));
   }
 
   void removeFile(int index) {
     selectedFiles?.removeAt(index);
     notifyListeners();
   }
+
   void updateSelectedFiles(List<PlatformFile> files) {
     // Nếu selectedFiles chưa được khởi tạo, khởi tạo nó
     selectedFiles ??= [];
@@ -31,17 +35,15 @@ class HomeViewModel extends BaseViewModel {
     // Cập nhật trạng thái cho các file đã có và file mới
     fileStatuses = List.generate(
       selectedFiles!.length,
-          (index) => FileStatus(
+      (index) => FileStatus(
           id: index,
-          status: index < previousLength ? fileStatuses[index].status : FileStatusType.idle
-      ),
+          status: index < previousLength
+              ? fileStatuses[index].status
+              : FileStatusType.idle),
     );
 
-    // Thông báo cập nhật giao diện
     notifyListeners();
   }
-
-
 
   Future<void> rotateFiles() async {
     if (selectedFiles == null || selectedFiles!.isEmpty) return;
@@ -55,14 +57,69 @@ class HomeViewModel extends BaseViewModel {
     notifyListeners();
 
     for (int i = 0; i < totalFiles; i++) {
-      await Future.delayed(Duration(seconds: 2)); // Simulate delay
+      await Future.delayed(const Duration(seconds: 5)); // Simulate delay
       fileStatuses[i].status = FileStatusType.done;
       progressValue = (i + 1) / totalFiles; // Update progress
       notifyListeners();
     }
   }
 
+  String _outputDirectory = "";
+  String get outputDirectory => _outputDirectory;
+
+  Future<void> pickOutputDirectory() async {
+    String? result = await FilePicker.platform.getDirectoryPath();
+
+    if (result != null) {
+      _outputDirectory = result;
+      notifyListeners();
+    }
+  }
+
+  Future<void> runExecutable() async {
+    const exePath = 'lib/services/process_files/dist/process_files.exe';
+
+    if (selectedFiles == null || selectedFiles!.isEmpty) return;
+
+    List<String> filePaths = selectedFiles!.map((file) => file.path!).toList();
+
+    int totalFiles = selectedFiles!.length;
+    progressValue = 0.0; // Reset progress
+
+    // Cập nhật trạng thái cho tất cả các tệp là loading
+    for (int i = 0; i < totalFiles; i++) {
+      fileStatuses[i].status = FileStatusType.loading;
+    }
+    notifyListeners();
+
+    for (int i = 0; i < totalFiles; i++) {
+      final arguments = [
+        _outputDirectory,
+        filePaths[i], // Chỉ truyền một tệp tại một thời điểm
+      ];
+
+      try {
+        final result = await Process.run(exePath, arguments);
+
+        if (result.stdout.contains("Done")) {
+          fileStatuses[i].status = FileStatusType.done;
+          progressValue = (i + 1) / totalFiles; // Cập nhật tiến trình
+          notifyListeners();
+          print('File ${filePaths[i]} processed successfully.');
+        } else {
+          // Xử lý lỗi nếu cần
+          print('Error processing file ${filePaths[i]}: ${result.stderr}');
+        }
+      } catch (e) {
+        print('Error: $e');
+      }
+    }
+
+    // Notify listeners chỉ khi hoàn tất
+    notifyListeners();
+  }
 }
+
 class FileStatus {
   final int id;
   FileStatusType status;

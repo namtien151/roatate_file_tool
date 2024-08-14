@@ -1,0 +1,2 @@
+
+pyinstaller --onefile --add-data "Tesseract-OCR/tesseract.exe;Tesseract-OCR" --add-data "Tesseract-OCR/tessdata;Tesseract-OCR/tessdata" --add-data "poppler-24.02.0/Library/bin;poppler-24.02.0/Library/bin" script.py

@@ -36,23 +36,23 @@ class HomeView extends StackedView<HomeViewModel> {
               ],
             ),
             child: Padding(
-              padding: EdgeInsets.all(20.0), // Khoảng cách với đường viền
+              padding: const EdgeInsets.all(20.0), // Khoảng cách với đường viền
               child: Column(
                 children: [
-                  SizedBox(height: 20), // Khoảng cách giữa các phần tử
+                  const SizedBox(height: 20), // Khoảng cách giữa các phần tử
                   DottedBorder(
                     color: Colors.black26,
                     strokeWidth: 1.5,
-                    dashPattern: [10, 7],
+                    dashPattern: const [10, 7],
                     borderType: BorderType.RRect,
-                    radius: Radius.circular(12),
-                    child: Container(
+                    radius: const Radius.circular(12),
+                    child: SizedBox(
                       height: 200,
                       width: 900,
                       child: Column(
                         children: [
                           Center(
-                            child: Container(
+                            child: SizedBox(
                               height: 100,
                               width: 100,
                               child: Image.asset(
@@ -75,7 +75,7 @@ class HomeView extends StackedView<HomeViewModel> {
                                 fontWeight: FontWeight.w400,
                                 color: Colors.black26),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 10,
                           ),
                           ElevatedButton(
@@ -86,9 +86,9 @@ class HomeView extends StackedView<HomeViewModel> {
                               elevation: 5,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
-                                side: BorderSide(color: Colors.black26),
+                                side: const BorderSide(color: Colors.black26),
                               ),
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                   horizontal: 30, vertical: 15),
                             ),
                             onPressed: () async {
@@ -103,7 +103,7 @@ class HomeView extends StackedView<HomeViewModel> {
                                 // User canceled the picker
                               }
                             },
-                            child: Text(
+                            child: const Text(
                               'Choose Files',
                               style: TextStyle(color: Colors.black),
                             ),
@@ -112,7 +112,7 @@ class HomeView extends StackedView<HomeViewModel> {
                       ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   ),
                   SingleChildScrollView(
@@ -128,84 +128,82 @@ class HomeView extends StackedView<HomeViewModel> {
                         ),
                       ),
                       child: viewModel.selectedFiles != null &&
-                          viewModel.selectedFiles!.isNotEmpty
+                              viewModel.selectedFiles!.isNotEmpty
                           ? ListView.builder(
-                        itemCount: viewModel.selectedFiles!.length,
-                        itemBuilder: (context, index) {
-                          PlatformFile fileItem =
-                          viewModel.selectedFiles![index];
-                          FileStatusType status =
-                              viewModel.fileStatuses[index].status;
-                          return Container(
-                            margin: EdgeInsets.symmetric(
-                                vertical: 5, horizontal: 10),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(9),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black26,
-                                  offset: Offset(0, 3), // Vị trí bóng
-                                  blurRadius: 10, // Độ mờ của bóng
-                                  spreadRadius:
-                                  0.5, // Độ lan rộng của bóng
-                                ),
-                              ],
-                            ),
-                            child: ListTile(
-                              title: Text(
-                                fileItem.name,
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                              subtitle: Text(
-                                fileItem.size < 1024 * 1024
-                                    ? '${(fileItem.size / 1024).toStringAsFixed(2)} KB' // Nếu kích thước nhỏ hơn 1 MB, hiển thị theo KB
-                                    : '${(fileItem.size / 1024 / 1024).toStringAsFixed(2)} MB', // Nếu kích thước lớn hơn 1 MB, hiển thị theo MB
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w100,
-                                ),
-                              ),
-
-
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  // Icon trạng thái dựa trên điều kiện
-                                  status == FileStatusType.idle
-                                      ? Image.asset(
-                                      'assets/image/close.png')
-                                      : status == FileStatusType.loading
-                                      ? CircularProgressIndicator() // Biểu tượng loading
-                                      : Icon(Icons.check_circle,
-                                      color: Colors
-                                          .green), // Trạng thái done
-
-                                  // Icon delete luôn hiển thị
-                                  IconButton(
-                                    icon: Icon(Icons.delete,
-                                        color: Colors.redAccent),
-                                    onPressed: () {
-                                      viewModel.removeFile(index);
-                                    },
+                              itemCount: viewModel.selectedFiles!.length,
+                              itemBuilder: (context, index) {
+                                PlatformFile fileItem =
+                                    viewModel.selectedFiles![index];
+                                FileStatusType status =
+                                    viewModel.fileStatuses[index].status;
+                                return Container(
+                                  margin: const EdgeInsets.symmetric(
+                                      vertical: 5, horizontal: 10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(9),
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: Colors.black26,
+                                        offset: Offset(0, 3), // Vị trí bóng
+                                        blurRadius: 10, // Độ mờ của bóng
+                                        spreadRadius:
+                                            0.5, // Độ lan rộng của bóng
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                  child: ListTile(
+                                    title: Text(
+                                      fileItem.name,
+                                      style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    subtitle: Text(
+                                      fileItem.size < 1024 * 1024
+                                          ? '${(fileItem.size / 1024).toStringAsFixed(2)} KB' // Nếu kích thước nhỏ hơn 1 MB, hiển thị theo KB
+                                          : '${(fileItem.size / 1024 / 1024).toStringAsFixed(2)} MB', // Nếu kích thước lớn hơn 1 MB, hiển thị theo MB
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w100,
+                                      ),
+                                    ),
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        // Icon trạng thái dựa trên điều kiện
+                                        status == FileStatusType.idle
+                                            ? Image.asset(
+                                                'assets/image/close.png')
+                                            : status == FileStatusType.loading
+                                                ? const CircularProgressIndicator() // Biểu tượng loading
+                                                : const Icon(Icons.check_circle,
+                                                    color: Colors
+                                                        .green), // Trạng thái done
+
+                                        // Icon delete luôn hiển thị
+                                        IconButton(
+                                          icon: const Icon(Icons.delete,
+                                              color: Colors.redAccent),
+                                          onPressed: () {
+                                            viewModel.removeFile(index);
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            )
+                          : const Center(
+                              child: Text(
+                                'No files selected',
+                                style: TextStyle(color: Colors.grey),
                               ),
                             ),
-                          );
-                        },
-                      )
-                          : Center(
-                        child: Text(
-                          'No files selected',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   ClipRRect(
@@ -223,44 +221,53 @@ class HomeView extends StackedView<HomeViewModel> {
                       child: LinearProgressIndicator(
                         value: viewModel.progressValue,
                         backgroundColor: Colors.grey,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.green),
+                        valueColor:
+                            const AlwaysStoppedAnimation<Color>(Colors.green),
                       ),
                     ),
                   ),
 
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await viewModel.rotateFiles();
-                    },
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.rotate_right,
-                            color: Colors.black26), // Thay đổi icon theo ý muốn
-                        SizedBox(width: 8), // Khoảng cách giữa icon và văn bản
-                        Text(
-                          'Xoay',
-                          style: TextStyle(color: Colors.black),
-                        ),
-                      ],
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.black26,
-                      backgroundColor: Colors.white,
-                      shadowColor: Colors.black26,
-                      elevation: 5,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(color: Colors.black26),
-                      ),
-                      padding:
-                      EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-                    ),
-                  )
+                  viewModel.outputDirectory.isEmpty
+                      ? ElevatedButton(
+                          onPressed: viewModel.pickOutputDirectory,
+                          child: const Text("Nơi xuất ra file"),
+                        )
+                      : ElevatedButton(
+                          onPressed: () async {
+                            await Future.wait([
+                              viewModel.runExecutable(),
+                            ]);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.black26,
+                            backgroundColor: Colors.white,
+                            shadowColor: Colors.black26,
+                            elevation: 5,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              side: const BorderSide(color: Colors.black26),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 50, vertical: 20),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.rotate_right,
+                                  color: Colors
+                                      .black26), // Thay đổi icon theo ý muốn
+                              SizedBox(
+                                  width: 8), // Khoảng cách giữa icon và văn bản
+                              Text(
+                                'Xoay',
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            ],
+                          ),
+                        )
                 ],
               ),
             ),
