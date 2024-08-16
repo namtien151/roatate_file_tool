@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:stacked/stacked.dart';
 import 'package:roatate_file_tool/app/app.locator.dart';
-import 'package:roatate_file_tool/app/app.router.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 class HomeViewModel extends BaseViewModel {
@@ -78,6 +77,7 @@ class HomeViewModel extends BaseViewModel {
 
   Future<void> runExecutable() async {
     const exePath = 'lib/services/process_files/dist/process_files.exe';
+    // const exePath = 'D:/locanh/process_files/dist/process_files.exe';
 
     if (selectedFiles == null || selectedFiles!.isEmpty) return;
 

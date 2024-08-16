@@ -1,7 +1,5 @@
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'package:stacked/stacked.dart';
 import 'package:dotted_border/dotted_border.dart';
@@ -233,7 +231,32 @@ class HomeView extends StackedView<HomeViewModel> {
                   viewModel.outputDirectory.isEmpty
                       ? ElevatedButton(
                           onPressed: viewModel.pickOutputDirectory,
-                          child: const Text("Nơi xuất ra file"),
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.black26,
+                            backgroundColor: Colors.white,
+                            shadowColor: Colors.black26,
+                            elevation: 5,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              side: const BorderSide(color: Colors.black26),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 50, vertical: 20),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.rotate_right,
+                                  color: Colors
+                                      .black26), // Thay đổi icon theo ý muốn
+                              SizedBox(
+                                  width: 8), // Khoảng cách giữa icon và văn bản
+                              Text(
+                                'Chọn nơi LƯU',
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            ],
+                          ),
                         )
                       : ElevatedButton(
                           onPressed: () async {

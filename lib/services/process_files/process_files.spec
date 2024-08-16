@@ -5,7 +5,7 @@ a = Analysis(
     ['process_files.py'],
     pathex=[],
     binaries=[],
-    datas=[('Tesseract-OCR/tesseract.exe', 'Tesseract-OCR'), ('Tesseract-OCR/tessdata', 'Tesseract-OCR/tessdata'), ('poppler-24.02.0/Library/bin', 'poppler-24.02.0/Library/bin')],
+    datas=[('Tesseract-OCR/tesseract.exe', 'Tesseract-OCR'), ('Tesseract-OCR/tessdata', 'Tesseract-OCR/tessdata')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
