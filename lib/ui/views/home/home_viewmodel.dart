@@ -77,7 +77,6 @@ class HomeViewModel extends BaseViewModel {
 
   Future<void> runExecutable() async {
     const exePath = 'lib/services/process_files/dist/process_files.exe';
-    // const exePath = 'D:/locanh/process_files/dist/process_files.exe';
 
     if (selectedFiles == null || selectedFiles!.isEmpty) return;
 
