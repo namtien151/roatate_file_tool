@@ -1,6 +1,9 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+
 import 'package:stacked/stacked.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:path/path.dart' as path;
@@ -42,10 +45,10 @@ class HomeView extends StackedView<HomeViewModel> {
                   DottedBorder(
                     color: Colors.black26,
                     strokeWidth: 1.5,
-                    dashPattern: [10, 7],
+                    dashPattern: const [10, 7],
                     borderType: BorderType.RRect,
-                    radius: Radius.circular(12),
-                    child: Container(
+                    radius: const Radius.circular(12),
+                    child: SizedBox(
                       height: 200,
                       width: 900,
                       child: Column(
@@ -74,7 +77,9 @@ class HomeView extends StackedView<HomeViewModel> {
                                 fontWeight: FontWeight.w400,
                                 color: Colors.black26),
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(
+                            height: 10,
+                          ),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               foregroundColor: Colors.black26,
@@ -83,15 +88,24 @@ class HomeView extends StackedView<HomeViewModel> {
                               elevation: 5,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
-                                side: BorderSide(color: Colors.black26),
+                                side: const BorderSide(color: Colors.black26),
                               ),
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                   horizontal: 30, vertical: 15),
                             ),
                             onPressed: () async {
-                              await viewModel.pickFolder();
+                              FilePickerResult? result = await FilePicker
+                                  .platform
+                                  .pickFiles(allowMultiple: true);
+
+                              if (result != null) {
+                                List<PlatformFile> files = result.files;
+                                viewModel.updateSelectedFiles(files);
+                              } else {
+                                // User canceled the picker
+                              }
                             },
-                            child: Text(
+                            child: const Text(
                               'Choose Files',
                               style: TextStyle(color: Colors.black),
                             ),
