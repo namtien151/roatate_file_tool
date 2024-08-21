@@ -304,5 +304,5 @@ class HomeView extends StackedView<HomeViewModel> {
   HomeViewModel viewModelBuilder(
     BuildContext context,
   ) =>
-      HomeViewModel();
+      HomeViewModel(context);
 }

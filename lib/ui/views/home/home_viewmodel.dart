@@ -1,12 +1,14 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:roatate_file_tool/ui/views/widget/notify/show_notify.dart';
 import 'package:stacked/stacked.dart';
-import 'package:roatate_file_tool/app/app.locator.dart';
-import 'package:stacked_services/stacked_services.dart';
 
 class HomeViewModel extends BaseViewModel {
-  final _navigationService = locator<NavigationService>();
+  BuildContext context;
+  HomeViewModel(this.context);
   List<PlatformFile>? selectedFiles = [];
   List<FileStatus> fileStatuses = [];
   double progressValue = 0.0;
@@ -21,17 +23,30 @@ class HomeViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  void updateSelectedFiles(List<PlatformFile> files) {
-    // Nếu selectedFiles chưa được khởi tạo, khởi tạo nó
+  void updateSelectedFiles(List<PlatformFile> files) async {
     selectedFiles ??= [];
-
-    // Lưu lại số lượng file hiện tại
     int previousLength = selectedFiles!.length;
+    List<PlatformFile> newFiles = [];
+    for (var file in files) {
+      bool exists =
+          selectedFiles!.any((selectedFile) => selectedFile.path == file.path);
+      if (!exists) {
+        newFiles.add(file);
+      } else {
+        showNotify(
+          context,
+          titleText: "File ${file.name} đã tồn tại.",
+          error: true,
+        );
+        await Future.delayed(const Duration(milliseconds: 600));
+        log('File ${file.name} đã tồn tại.');
+      }
+    }
 
-    // Thêm tất cả các file mới vào danh sách hiện có
-    selectedFiles!.addAll(files);
+    // Thêm các tệp mới không trùng lặp vào danh sách hiện có
+    selectedFiles!.addAll(newFiles);
 
-    // Cập nhật trạng thái cho các file đã có và file mới
+    // Cập nhật trạng thái cho các tệp đã có và tệp mới
     fileStatuses = List.generate(
       selectedFiles!.length,
       (index) => FileStatus(
@@ -104,17 +119,16 @@ class HomeViewModel extends BaseViewModel {
           fileStatuses[i].status = FileStatusType.done;
           progressValue = (i + 1) / totalFiles; // Cập nhật tiến trình
           notifyListeners();
-          print('File ${filePaths[i]} processed successfully.');
+          log('File ${filePaths[i]} processed successfully.');
         } else {
           // Xử lý lỗi nếu cần
-          print('Error processing file ${filePaths[i]}: ${result.stderr}');
+          log('Error processing file ${filePaths[i]}: ${result.stderr}');
         }
       } catch (e) {
-        print('Error: $e');
+        log('Error: $e');
       }
     }
-
-    // Notify listeners chỉ khi hoàn tất
+    showNotify(context, titleText: "Xử lý xoay file thành công", success: true);
     notifyListeners();
   }
 }
