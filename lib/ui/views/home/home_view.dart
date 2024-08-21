@@ -124,7 +124,7 @@ class HomeView extends StackedView<HomeViewModel> {
                                 leading: const Icon(Icons.folder,
                                     color: Colors.amber),
                                 title: Text(
-                                  '${viewModel.selectedDirectory!}',
+                                  viewModel.selectedDirectory!,
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold),
                                 ),
@@ -194,7 +194,9 @@ class HomeView extends StackedView<HomeViewModel> {
                                                     // Hiển thị kích thước tệp nếu là tệp
                                                     file is File
                                                         ? Text(
-                                                            '${viewModel.formatFileSize(File(file.path).lengthSync())}', // Hiển thị kích thước tệp
+                                                            viewModel.formatFileSize(
+                                                                File(file.path)
+                                                                    .lengthSync()), // Hiển thị kích thước tệp
                                                             style:
                                                                 const TextStyle(
                                                               fontSize: 14,
@@ -358,5 +360,5 @@ class HomeView extends StackedView<HomeViewModel> {
   HomeViewModel viewModelBuilder(
     BuildContext context,
   ) =>
-      HomeViewModel();
+      HomeViewModel(context);
 }

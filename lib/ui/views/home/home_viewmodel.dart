@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +11,8 @@ import '../../../app/app.locator.dart';
 
 class HomeViewModel extends BaseViewModel {
   final _navigationService = locator<NavigationService>();
+  BuildContext context;
+  HomeViewModel(this.context);
 
   List<FileStatus> fileStatuses = [];
   double progressValue = 0.0;
@@ -131,17 +132,17 @@ class HomeViewModel extends BaseViewModel {
         if (result.stdout.contains("Done")) {
           fileStatuses[i].status = FileStatusType.done;
           progressValue = (i + 1) / totalFiles; // Cập nhật tiến trình
+          print(' file save in ${filePaths[i]}: ${result.stderr}');
           notifyListeners();
-          log('File ${filePaths[i]} processed successfully.' as num);
         } else {
           // Xử lý lỗi nếu cần
-          log('Error processing file ${filePaths[i]}: ${result.stderr}' as num);
+          print('Error processing file ${filePaths[i]}: ${result.stderr}');
         }
       } catch (e) {
         // log('Error: $e' as num);
       }
     }
-    // showNotify(context, titleText: "Xử lý xoay file thành công", success: true);
+    showNotify(context, titleText: "Xử lý xoay file thành công", success: true);
     notifyListeners();
   }
 
