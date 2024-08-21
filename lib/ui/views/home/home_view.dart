@@ -246,7 +246,7 @@ class HomeView extends StackedView<HomeViewModel> {
                           child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.rotate_right,
+                              Icon(Icons.file_download_outlined,
                                   color: Colors
                                       .black26), // Thay đổi icon theo ý muốn
                               SizedBox(

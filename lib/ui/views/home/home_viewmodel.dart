@@ -30,8 +30,19 @@ class HomeViewModel extends BaseViewModel {
     for (var file in files) {
       bool exists =
           selectedFiles!.any((selectedFile) => selectedFile.path == file.path);
+      bool exists1 =
+          selectedFiles!.any((selectedFile) => selectedFile.name == file.name);
       if (!exists) {
-        newFiles.add(file);
+        if (!exists1) {
+          newFiles.add(file);
+        } else {
+          showNotify(
+            context,
+            titleText: "File ${file.name} đã tồn tại.",
+            error: true,
+          );
+          await Future.delayed(const Duration(milliseconds: 600));
+        }
       } else {
         showNotify(
           context,
