@@ -76,6 +76,7 @@ def process_pdf(pdf_path, output_pdf_path):
         # Tính toán và ghi nhận tiến độ
         progress = (i + 1) / total_pages * 100
         print(json.dumps({"progress": progress}), file=sys.stdout)
+        sys.stdout.flush()
 
 
     if corrected_images:
@@ -87,6 +88,35 @@ def process_pdf(pdf_path, output_pdf_path):
             quality=95
         )
     print("Done", file=sys.stdout)
+    sys.stdout.flush()
+    
+def preprocess_image(image_path):
+    with Image.open(image_path) as img:
+        new_size = (int(img.width * 2), int(img.height * 2))
+        return img.resize(new_size, Image.Resampling.LANCZOS)
+
+def process_images(image_path, output_folder):
+    try:
+        # Mở và xử lý ảnh
+        img = preprocess_image(image_path)
+        
+        # Phát hiện hướng và xoay ảnh
+        angle = detect_text_orientation(img)
+        if angle != 0:
+            rotated_img = rotate_image(img, angle)
+        else:
+            rotated_img = img
+        
+        # Tạo đường dẫn lưu ảnh đã xử lý
+        output_path = os.path.join(output_folder, os.path.basename(image_path))
+        
+        # Lưu ảnh đã xoay vào thư mục đầu ra
+        rotated_img.save(output_path)
+        
+        print(f"Done", file=sys.stdout)
+    except Exception as e:
+        print(f"Error processing {image_path}: {e}", file=sys.stderr)
+
 
 
 def process_file(file_path, output_folder):
@@ -94,7 +124,7 @@ def process_file(file_path, output_folder):
         output_pdf_path = os.path.join(output_folder, os.path.basename(file_path))
         process_pdf(file_path, output_pdf_path)
     elif file_path.lower().endswith(('.png', '.jpg', '.jpeg')):
-        print("Handling image file - this part is not yet implemented")
+        process_images(file_path, output_folder)
 
 def process_files(file_paths, output_folder):
     with ThreadPoolExecutor(max_workers=os.cpu_count()*2) as executor:

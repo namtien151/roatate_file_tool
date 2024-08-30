@@ -1,9 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:stacked/stacked.dart';
-import 'package:dotted_border/dotted_border.dart';
-import 'package:path/path.dart' as path;
 import 'package:stacked_services/stacked_services.dart';
 import 'dart:math';
 import '../../../app/app.dialogs.dart';
@@ -11,7 +10,7 @@ import '../../../app/app.locator.dart';
 import '../widget/notify/show_notify.dart';
 
 class HomeViewModel extends BaseViewModel {
-  final _navigationService = locator<NavigationService>();
+  // final _navigationService = locator<NavigationService>();
   BuildContext context;
   HomeViewModel(this.context);
 
@@ -194,31 +193,31 @@ class HomeViewModel extends BaseViewModel {
   Future<void> _processFile(
       String exePath, List<String> arguments, int index, int totalFiles) async {
     try {
-      final result = await Process.run(exePath, arguments);
-      final fileName = arguments[1].split('/').last.split('\\').last;
-      final outputFilePath = '$_outputDirectory\\$fileName';
+      final process = await Process.start(exePath, arguments);
 
-      if (result.stdout.contains("Done")) {
-        fileStatuses[index].status = FileStatusType.done;
+      process.stdout.transform(utf8.decoder).listen((output) {
+        if (output.contains('progress')) {
+          final progressData = jsonDecode(output);
+          fileStatuses[index].progress =
+              progressData['progress']; // Cập nhật tiến trình
+          notifyListeners(); // Thông báo cho giao diện cập nhật
+        } else if (output.contains("Done")) {
+          fileStatuses[index].status = FileStatusType.done;
+          completedFiles++;
+          progressValue =
+              completedFiles / totalFiles; // Cập nhật tiến trình chung
+          showDeleteButton = true;
+          notifyListeners();
+        }
+      });
 
-        // Cập nhật số tệp đã hoàn thành
-        completedFiles++;
-        progressValue = completedFiles /
-            totalFiles; // Cập nhật tiến trình dựa trên số tệp đã hoàn thành
+      process.stderr.transform(utf8.decoder).listen((error) {
+        print('Error processing file ${arguments[1]}: $error');
+      });
 
-        notifyListeners();
-        processingStatus = '$completedFiles File processed successfully.';
-        notifyListeners();
-        showDeleteButton = true;
-        notifyListeners();
-        currentFilePath = outputFilePath;
-        print(outputFilePath);
-      } else {
-        // Xử lý lỗi nếu cần
-        // log('Error processing file ${arguments[1]}: ${result.stderr}');
-      }
+      await process.exitCode;
     } catch (e) {
-      // log('Error: $e');
+      print('Error: $e');
     }
   }
 
@@ -280,8 +279,9 @@ class HomeViewModel extends BaseViewModel {
 class FileStatus {
   final int id;
   FileStatusType status;
+  double progress; // Thêm thuộc tính tiến trình
 
-  FileStatus({required this.id, required this.status});
+  FileStatus({required this.id, required this.status, this.progress = 0.0});
 }
 
 enum FileStatusType { idle, loading, done }
