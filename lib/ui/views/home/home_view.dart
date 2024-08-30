@@ -231,25 +231,40 @@ class HomeView extends StackedView<HomeViewModel> {
                                                             .start,
                                                     children: [
                                                       // Hiển thị kích thước tệp nếu là tệp
-                                                      file is File
-                                                          ? Text(
+                                                      if (file is File)
+                                                        Column(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                          children: [
+                                                            Text(
                                                               '${viewModel.formatFileSize(File(file.path).lengthSync())}', // Hiển thị kích thước tệp
                                                               style: TextStyle(
                                                                 fontSize: 14,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w300,
+                                                                fontWeight: FontWeight.w300,
                                                               ),
-                                                            )
-                                                          : Container(),
-                                                      // Hiển thị đường dẫn tệp
-                                                      Text(
-                                                        file.path, // Hiển thị đường dẫn đầy đủ
-                                                        style: TextStyle(
-                                                          fontSize: 12,
-                                                          color: Colors.grey,
-                                                        ),
-                                                      ),
+                                                            ),
+                                                            if (viewModel.isFileLarge(File(file.path).lengthSync()))
+                                                              Text(
+                                                                'Lưu ý: File này sẽ xu ly chậm',
+                                                                style: TextStyle(
+                                                                  fontSize: 14,
+                                                                  fontWeight: FontWeight.w300,
+                                                                  color: Colors.red,
+                                                                ),
+                                                              ),
+                                                            // Text('Processing File: ${viewModel.progress.toStringAsFixed(2)}%'),
+
+                                                            // Hiển thị đường dẫn tệp
+                                                            Text(
+                                                              file.path, // Hiển thị đường dẫn đầy đủ
+                                                              style: TextStyle(
+                                                                fontSize: 12,
+                                                                color: Colors.grey,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        )
+                                                      else
+                                                        Container(),
                                                     ],
                                                   ),
                                                   trailing: Row(
@@ -326,6 +341,7 @@ class HomeView extends StackedView<HomeViewModel> {
                       ),
                       child: LinearProgressIndicator(
                         value: viewModel.progressValue,
+
                         backgroundColor: Colors.grey,
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
                       ),

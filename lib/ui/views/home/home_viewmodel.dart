@@ -25,6 +25,7 @@ class HomeViewModel extends BaseViewModel {
   bool showDeleteButton = false;
   bool _isCancelled = false;
   String? currentFilePath;
+  String data ='';
 
   String? get selectedDirectory => _selectedDirectory;
   List<FileSystemEntity>? get files => _files;
@@ -96,10 +97,21 @@ class HomeViewModel extends BaseViewModel {
 
   String formatFileSize(int bytes) {
     if (bytes <= 0) return '0 B';
+
     const units = ['B', 'KB', 'MB', 'GB', 'TB'];
     final i = (log(bytes) / log(1024)).floor();
-    return '${(bytes / pow(1024, i)).toStringAsFixed(2)} ${units[i]}';
+    final fileSize = bytes / pow(1024, i);
+    final formattedSize = fileSize.toStringAsFixed(2);
+
+    // Trả về kích thước và đơn vị tính
+    return '$formattedSize ${units[i]}';
   }
+
+  bool isFileLarge(int bytes) {
+    const tenMB = 10 * 1024 * 1024; // 10 MB in bytes
+    return bytes > tenMB;
+  }
+
 
   void toggleFilesVisibility() {
     _showFiles = !_showFiles;
@@ -120,6 +132,7 @@ class HomeViewModel extends BaseViewModel {
 
   Future<void> runExecutable() async {
     const exePath = 'lib/services/process_files/dist/process_files.exe';
+    completedFiles = 0;
     print('$_outputDirectory');
     if (_outputDirectory.isEmpty) {
       showNotify(context,
@@ -177,10 +190,6 @@ class HomeViewModel extends BaseViewModel {
     _isCancelled = false;
     notifyListeners();
   }
-
-
-
-
 
   int completedFiles = 0; // Biến đếm số tệp đã hoàn thành
 
