@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:stacked/stacked.dart';
+import 'package:dotted_border/dotted_border.dart';
+import 'package:path/path.dart' as path;
 import 'package:stacked_services/stacked_services.dart';
 import 'dart:math';
 import '../../../app/app.dialogs.dart';
@@ -10,10 +12,11 @@ import '../../../app/app.locator.dart';
 import '../widget/notify/show_notify.dart';
 
 class HomeViewModel extends BaseViewModel {
-  // final _navigationService = locator<NavigationService>();
+  final _navigationService = locator<NavigationService>();
   BuildContext context;
   HomeViewModel(this.context);
-
+  Map<int, double> _imageProgress = {};
+  Map<int, double> get imageProgress => _imageProgress;
   List<FileStatus> fileStatuses = [];
   double progressValue = 0.0;
   bool _showFiles = false;
@@ -24,7 +27,7 @@ class HomeViewModel extends BaseViewModel {
   bool showDeleteButton = false;
   bool _isCancelled = false;
   String? currentFilePath;
-  String data = '';
+  String data ='';
 
   String? get selectedDirectory => _selectedDirectory;
   List<FileSystemEntity>? get files => _files;
@@ -48,7 +51,7 @@ class HomeViewModel extends BaseViewModel {
     notifyListeners();
 
     for (int i = 0; i < totalFiles; i++) {
-      await Future.delayed(const Duration(seconds: 1)); // Simulate delay
+      await Future.delayed(Duration(seconds: 1)); // Simulate delay
       fileStatuses[i].status = FileStatusType.done;
       progressValue = (i + 1) / totalFiles; // Update progress
       notifyListeners();
@@ -111,6 +114,7 @@ class HomeViewModel extends BaseViewModel {
     return bytes > tenMB;
   }
 
+
   void toggleFilesVisibility() {
     _showFiles = !_showFiles;
     notifyListeners();
@@ -131,15 +135,16 @@ class HomeViewModel extends BaseViewModel {
   Future<void> runExecutable() async {
     const exePath = 'lib/services/process_files/dist/process_files.exe';
     completedFiles = 0;
-    print(_outputDirectory);
+    print('$_outputDirectory');
     if (_outputDirectory.isEmpty) {
-      showNotify(context, titleText: "vui lòng chọn nơi lưu", success: false);
+      showNotify(context,
+          titleText: "vui lòng chọn nơi lưu", success: false);
       return;
     }
 
     if (_files == null || _files!.isEmpty) return;
 
-    List<String> filePaths = _files!.map((file) => file.path).toList();
+    List<String> filePaths = _files!.map((file) => file.path!).toList();
 
     int totalFiles = _files!.length;
     progressValue = 0.0; // Reset progress
@@ -190,36 +195,51 @@ class HomeViewModel extends BaseViewModel {
 
   int completedFiles = 0; // Biến đếm số tệp đã hoàn thành
 
-  Future<void> _processFile(
-      String exePath, List<String> arguments, int index, int totalFiles) async {
+  Future<void> _processFile(String exePath, List<String> arguments, int index, int totalFiles) async {
     try {
-      final process = await Process.start(exePath, arguments);
+      final result = await Process.run(exePath, arguments);
 
-      process.stdout.transform(utf8.decoder).listen((output) {
-        if (output.contains('progress')) {
-          final progressData = jsonDecode(output);
-          fileStatuses[index].progress =
-              progressData['progress']; // Cập nhật tiến trình
-          notifyListeners(); // Thông báo cho giao diện cập nhật
-        } else if (output.contains("Done")) {
-          fileStatuses[index].status = FileStatusType.done;
-          completedFiles++;
-          progressValue =
-              completedFiles / totalFiles; // Cập nhật tiến trình chung
-          showDeleteButton = true;
-          notifyListeners();
+      // Xử lý thông tin từ kết quả
+      final fileName = arguments[1].split('/').last.split('\\').last;
+      final outputFilePath = '$_outputDirectory\\$fileName';
+
+      // Giả sử rằng tiến độ từng ảnh được gửi qua stdout dưới dạng JSON
+      final outputLines = result.stdout.toString().split('\n');
+      for (var line in outputLines) {
+        if (line.isNotEmpty) {
+          final jsonData = jsonDecode(line);
+          if (jsonData.containsKey('imageProgress')) {
+            // Cập nhật tiến độ của ảnh cụ thể
+            final imageProgressValue = jsonData['imageProgress'] as double;
+            imageProgress[index] = imageProgressValue;
+            print('nnnn $imageProgressValue');
+            notifyListeners();
+          }
         }
-      });
+      }
 
-      process.stderr.transform(utf8.decoder).listen((error) {
-        print('Error processing file ${arguments[1]}: $error');
-      });
+      if (result.stdout.contains("Done")) {
+        fileStatuses[index].status = FileStatusType.done;
+        completedFiles++;
+        progressValue = completedFiles / totalFiles; // Cập nhật tiến trình dựa trên số tệp đã hoàn thành
 
-      await process.exitCode;
+        notifyListeners();
+        processingStatus = '${completedFiles} File processed successfully.';
+        showDeleteButton = true;
+        notifyListeners();
+        currentFilePath = outputFilePath;
+        print(outputFilePath);
+      }
     } catch (e) {
       print('Error: $e');
     }
   }
+
+  void updateImageProgress(int index, double progress) {
+    _imageProgress[index] = progress;
+    notifyListeners();
+  }
+
 
   void clearAll() {
     // Xóa danh sách các file đã chọn
@@ -248,7 +268,7 @@ class HomeViewModel extends BaseViewModel {
   Future<void> openDialogResult(int index) async {
     try {
       // Lấy đường dẫn tệp từ chỉ số index
-      final fileName = files?[index].path.split('/').last.split('\\').last;
+      final fileName =files?[index].path.split('/').last.split('\\').last;
       final outputFilePath = '$_outputDirectory\\$fileName';
       final fileNameNPro = files?[index].path;
 
@@ -256,15 +276,12 @@ class HomeViewModel extends BaseViewModel {
       final DialogResponse? response = await _dialogService.showCustomDialog(
         variant: DialogType.resultTurn, // Thay đổi loại dialog nếu cần
         title: 'Ket Qua', // Tiêu đề của dialog
-        data: {
-          'filePath': outputFilePath,
-          'fileNameNPro': fileNameNPro
-        }, // Truyền đường dẫn tệp vào dialog
+        data: {'filePath': outputFilePath,'fileNameNPro': fileNameNPro}, // Truyền đường dẫn tệp vào dialog
       );
 
-      if (response == true) {
+      if(response == true){
         print("thanh cong");
-      } else {
+      }else{
         print("gg");
       }
 
@@ -274,14 +291,18 @@ class HomeViewModel extends BaseViewModel {
       // Xử lý lỗi nếu cần
     }
   }
+
+
+
+
+
 }
 
 class FileStatus {
   final int id;
   FileStatusType status;
-  double progress; // Thêm thuộc tính tiến trình
 
-  FileStatus({required this.id, required this.status, this.progress = 0.0});
+  FileStatus({required this.id, required this.status});
 }
 
 enum FileStatusType { idle, loading, done }
